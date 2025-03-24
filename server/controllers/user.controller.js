@@ -67,7 +67,6 @@ export async function registerUserController(request,response) {
     }
 }
 
-
 //email verification
 export async function verifyEmailController(request, response) {
     try {
@@ -102,11 +101,18 @@ export async function verifyEmailController(request, response) {
     }
 }
 
-
-//user login controller
+//user login
 export async function loginController(request,response) {
     try {
         const { email, password } = request.body
+
+        if(!email || !password){
+            return response.status(400).json({
+                message : "Email and password are required",
+                error : true,
+                success : false
+            })
+        }
 
         const user = await UserModel.findOne({ email })
 
@@ -156,6 +162,40 @@ export async function loginController(request,response) {
                 accesstoken,
                 refreshtoken
             }
+        })
+
+    } catch (error) {
+        return response.status(500).json({
+            message : error.message || error,
+            error : true,
+            success : false
+        })
+    }
+}
+
+//logout
+export async function logoutController(request, response) {
+    try {
+
+        const userid = request.userId //middleware
+
+        const cookiesOption = {
+            httpOnly: true,
+            secure : true,
+            sameSite : "None",
+        }
+
+        response.clearCookie("accessToken", cookiesOption)
+        response.clearCookie("refreshToken", cookiesOption)
+
+        const removeRefreshToken = await UserModel.findByIdAndUpdate(userid,{
+            refresh_token : ""
+        })
+
+        return response.json({
+            message : "Logout Successfull",
+            error : false,
+            success : true
         })
 
     } catch (error) {
