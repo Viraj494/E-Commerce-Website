@@ -75,7 +75,7 @@ export async function verifyEmailController(request, response) {
 
         const user = await UserModel.findOne({_id : code})
 
-        if(user){
+        if(!user){
             return response.status(400).json({
                 message : "Invalid Code",
                 error : true,
@@ -230,6 +230,42 @@ export async function uploadAvatar(request,response) {
 
     } catch (error) {
         return response.status(500).json({
+            message : error.message || error,
+            error : true,
+            success : false
+        })
+    }
+}
+
+//update user details
+export async function updateUserDetails(request,response){
+    try {
+        const userId = request.userId //from auth middleware
+        const { name, email, mobile, password } = request.body
+
+        let hashPassword = ""
+
+        if(password){
+            const salt = await bcryptjs.genSalt(10)
+            hashPassword = await bcryptjs.hash(password, salt)
+        }
+
+        const updateUser = await UserModel.updateOne({_id : userId},{
+            ...(name && { name : name }),
+            ...(email && { email : email }),
+            ...(mobile && { mobile : mobile }),
+            ...(password && { password : hashPassword })
+        })
+
+        return response.json({
+            message : "user details updated successfully",
+            error : false,
+            success : true,
+            data : updateUser
+        })
+
+    } catch (error) {
+        return reesponse.status(500).json9({
             message : error.message || error,
             error : true,
             success : false
