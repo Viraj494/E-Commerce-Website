@@ -6,6 +6,7 @@ import generateAccessToken from "../utils/generateAccessToken.js";
 import generateRefreshToken from "../utils/generateRefreshToken.js";
 import uploadImageCloudinary from "../utils/uploadImageCloudinary.js";
 import generatedOtp from "../utils/generatedOTP.js";
+import forgotPasswordTemplate from "../utils/forgotPasswordTemplate.js";
 
 //user registration
 export async function registerUserController(request,response) {
@@ -304,8 +305,13 @@ export async function forgotPasswordController(request,response){
                 name : user.name,
                 otp : otp
             })
-        })
+        })  
         
+        return response.json({
+            message : "check your email",
+            error : false,
+            success : true
+        })
         
     } catch (error) {
         return response.status(500).json({
